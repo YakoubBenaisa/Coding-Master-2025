@@ -6,13 +6,14 @@ const TeamForm = () => {
   const [matricule, setMatricule] = useState('');
   
   // Leader id from localStorage
-  const leaderId = useState(null);
+  const leaderId = localStorage.getItem('leader_id') || 4; // Default leader ID if not in localStorage
   // State for team members array - each with member details
   const [members, setMembers] = useState([{
     memberId: '',
     memberName: '',
     memberEmail: '',
-    memberPhone: ''
+    memberPhone: '',
+    leaderId: leaderId
   }]);
   
   // Loading and error states
@@ -27,7 +28,6 @@ const TeamForm = () => {
       setLeaderId(storedLeaderId);
     } else {
       // Default leader ID if not in localStorage
-      setLeaderId(4); // Using the leader_id from your example
     }
   }, []);
 

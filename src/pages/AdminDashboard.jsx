@@ -28,6 +28,7 @@ export default function AdminDashboard() {
         }
   
         return await response.json();
+        navigate("/student");
       } catch (error) {
         console.error('Error during logout:', error);
         throw error;
