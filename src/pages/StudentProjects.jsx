@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/authStore';
 import { studentAPI } from '../services/api';
+import EditProjectModal from '../components/projects/EditProjectModal';
 
 export default function StudentProjects() {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ export default function StudentProjects() {
   const [submittingProject, setSubmittingProject] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [projectToSubmit, setProjectToSubmit] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -67,8 +70,22 @@ export default function StudentProjects() {
       doc.text(`Phone: ${user.phone || 'N/A'}`, 20, 44);
     }
 
+    // Add status color indicator
+    let statusColor;
+    if (project.status.includes('Directed')) {
+      statusColor = [0, 128, 0]; // Green
+    } else if (project.status === 'Rejected') {
+      statusColor = [220, 0, 0]; // Red
+    } else if (project.status === 'Processing') {
+      statusColor = [255, 165, 0]; // Orange
+    } else {
+      statusColor = [0, 0, 255]; // Blue
+    }
+    doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+
     // Add project details
     doc.text(`Status: ${project.status}`, 20, 55);
+    doc.setTextColor(0, 0, 0); // Reset text color to black
     doc.text(`Submission Status: ${project.submitted ? 'Submitted' : 'Not Submitted'}`, 20, 62);
     if (project.submitted) {
       doc.text(`Submitted on: ${new Date(project.submitted_at).toLocaleString()}`, 20, 69);
@@ -168,6 +185,28 @@ export default function StudentProjects() {
     }
   };
 
+  // Handle opening the edit modal
+  const handleEditClick = (project) => {
+    setProjectToEdit(project);
+    setShowEditModal(true);
+  };
+
+  // Handle closing the edit modal
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setProjectToEdit(null);
+  };
+
+  // Handle project update
+  const handleProjectUpdated = (updatedProject) => {
+    // Update the project in the local state
+    const updatedProjects = projects.map(p =>
+      p.id === updatedProject.id ? updatedProject : p
+    );
+
+    setProjects(updatedProjects);
+  };
+
   // Check if a project is past its deadline
   const isPastDeadline = (deadline) => {
     return new Date(deadline) < new Date();
@@ -255,7 +294,7 @@ export default function StudentProjects() {
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800 mb-2">{project.title}</h2>
                       <div className="flex flex-wrap gap-2 mb-3">
-                        <div className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${project.status.includes('Directed') ? 'bg-green-100 text-green-800' : project.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+                        <div className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${project.status.includes('Directed') ? 'bg-green-100 text-green-800' : project.status === 'Rejected' ? 'bg-red-100 text-red-800' : project.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>
                           {project.status}
                         </div>
                         {project.submitted ? (
@@ -289,28 +328,39 @@ export default function StudentProjects() {
                         Download as PDF
                       </button>
                       {!project.submitted && !isPastDeadline(project.submission_deadline) && (
-                        <button
-                          onClick={() => handleSubmitClick(project)}
-                          disabled={submittingProject === project.id}
-                          className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center disabled:bg-green-300 disabled:cursor-not-allowed"
-                        >
-                          {submittingProject === project.id ? (
-                            <>
-                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Submitting...
-                            </>
-                          ) : (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                              Submit Project
-                            </>
-                          )}
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleEditClick(project)}
+                            className="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600 transition-colors flex items-center"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit Project
+                          </button>
+                          <button
+                            onClick={() => handleSubmitClick(project)}
+                            disabled={submittingProject === project.id}
+                            className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center disabled:bg-green-300 disabled:cursor-not-allowed"
+                          >
+                            {submittingProject === project.id ? (
+                              <>
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Submitting...
+                              </>
+                            ) : (
+                              <>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Submit Project
+                              </>
+                            )}
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -364,6 +414,15 @@ export default function StudentProjects() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Edit Project Modal */}
+      {showEditModal && projectToEdit && (
+        <EditProjectModal
+          project={projectToEdit}
+          onClose={handleCloseEditModal}
+          onProjectUpdated={handleProjectUpdated}
+        />
       )}
     </div>
   );
