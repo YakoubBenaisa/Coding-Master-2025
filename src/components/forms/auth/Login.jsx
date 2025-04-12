@@ -1,7 +1,34 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../../services/api';
+// Import your authStore hook (or similar) to save token and user info. Adjust the import path as needed.
 import useAuthStore from '../../../store/authStore';
+
+// Define your API methods.
+const authAPI = {
+  login: async (credentials) => {
+    try {
+      const response = await fetch('https://5138-41-111-220-41.ngrok-free.app/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(credentials)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      // Return the JSON payload assuming it has the shape:
+      // { data: { token: '...', user: { id, email, username } } }
+      return await response.json();
+    } catch (error) {
+      console.error('Error during login:', error);
+      throw error;
+    }
+  }
+};
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,8 +50,11 @@ export default function Login() {
     };
 
     try {
+      // Make the API call using authAPI.login.
       const response = await authAPI.login(credentials);
-      setAuth(response.data.token, response.data.user);
+      // Save the JWT token and user data in your authStore.
+      setAuth(response.token, response.user);
+      // Navigate to the tasks page upon successful login.
       navigate('/tasks');
     } catch (err) {
       setError(err.message || 'Login failed');

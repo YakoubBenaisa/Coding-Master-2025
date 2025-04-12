@@ -28,23 +28,45 @@ let mockTasks = [
 ];
 
 // Mock functions
-const mockLogin = async (credentials) => {
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  
-  if (credentials.email === MOCK_USER.email && credentials.password === MOCK_USER.password) {
-    return {
-      data: {
-        token: 'mock-jwt-token',
-        user: {
-          id: 1,
-          email: MOCK_USER.email,
-          username: 'student'
-        }
-      }
-    };
+const login = async (credentials) => {
+  try {
+    const response = await fetch(API_URL+'/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+
+    if (!response.ok) {
+      // Optionally, you can customize error handling based on response status.
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Login failed');
+    }
+
+    // Assuming the API returns JSON in a similar structure as your mockLogin function.
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error during login:', error);
+    // Here you might want to re-throw the error or handle it gracefully.
+    throw error;
   }
-  throw new Error('Invalid credentials');
 };
+
+// Example usage:
+const credentials = { email: 'user@example.com', password: 'securePassword' };
+
+login(credentials)
+  .then(data => {
+    // Successful login: handle token and user info from data.data
+    console.log('Login successful:', data);
+  })
+  .catch(error => {
+    // Handle errors: show error message, etc.
+    console.error('Login error:', error);
+  });
+
 
 const mockGetTasks = async () => {
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
@@ -126,7 +148,7 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: mockLogin, // Using mock login instead of real API
+  login: login, // Using mock login instead of real API
   register: (userData) => api.post('/auth/register/', userData),
   getCurrentUser: () => api.get('/auth/user/'),
 };
