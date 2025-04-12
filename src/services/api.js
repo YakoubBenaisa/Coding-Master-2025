@@ -174,4 +174,90 @@ export const tasksAPI = {
   getStatuses: mockGetStatuses, // Using mock statuses fetching
 };
 
+// Mock student projects data
+let mockStudentProjects = [
+  {
+    id: 101,
+    title: 'Smart Home Automation',
+    description: 'A project to automate home appliances using IoT devices and machine learning algorithms. The system will learn user preferences over time and adjust settings automatically.',
+    status: 'Sent',
+    created_at: new Date().toISOString(),
+    teamMembers: [
+      { id: 'ST001', name: 'John Doe', email: 'john@example.com', phone: '123-456-7890' },
+      { id: 'ST002', name: 'Jane Smith', email: 'jane@example.com', phone: '234-567-8901' }
+    ]
+  },
+  {
+    id: 102,
+    title: 'AI-Powered Chatbot',
+    description: 'A chatbot that uses natural language processing to provide customer support for e-commerce websites. It can handle product inquiries, order status, and returns.',
+    status: 'Directed to Interface 1',
+    created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    teamMembers: [
+      { id: 'ST003', name: 'Bob Johnson', email: 'bob@example.com', phone: '345-678-9012' },
+      { id: 'ST004', name: 'Alice Brown', email: 'alice@example.com', phone: '456-789-0123' },
+      { id: 'ST005', name: 'Charlie Davis', email: 'charlie@example.com', phone: '567-890-1234' }
+    ]
+  },
+  {
+    id: 103,
+    title: 'Blockchain-Based Voting System',
+    description: 'A secure and transparent voting system using blockchain technology to ensure the integrity of election results and prevent fraud.',
+    status: 'Directed to Interface 2',
+    created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    teamMembers: [
+      { id: 'ST006', name: 'David Wilson', email: 'david@example.com', phone: '678-901-2345' },
+      { id: 'ST007', name: 'Eva Martinez', email: 'eva@example.com', phone: '789-012-3456' },
+      { id: 'ST008', name: 'Frank Thomas', email: 'frank@example.com', phone: '890-123-4567' },
+      { id: 'ST009', name: 'Grace Lee', email: 'grace@example.com', phone: '901-234-5678' }
+    ]
+  },
+  {
+    id: 104,
+    title: 'Augmented Reality Learning App',
+    description: 'An educational app that uses augmented reality to make learning more interactive and engaging for K-12 students. Covers subjects like science, history, and mathematics.',
+    status: 'Rejected',
+    created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+    teamMembers: [
+      { id: 'ST010', name: 'Henry Clark', email: 'henry@example.com', phone: '012-345-6789' },
+      { id: 'ST011', name: 'Ivy Rodriguez', email: 'ivy@example.com', phone: '123-456-7890' }
+    ]
+  }
+];
+
+// Mock function to get student projects
+const mockGetStudentProjects = async () => {
+  await new Promise(resolve => setTimeout(resolve, 600)); // Simulate network delay
+  return { data: mockStudentProjects };
+};
+
+// Mock function to get training program details
+const mockGetTrainingProgram = async (projectId) => {
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+
+  const project = mockStudentProjects.find(p => p.id === parseInt(projectId));
+  if (!project) throw new Error('Project not found');
+
+  // Only return PDF URL if project is directed to an interface
+  if (project.status.includes('Directed to Interface')) {
+    const interfaceNumber = project.status.split(' ').pop();
+    return {
+      data: {
+        pdfUrl: `https://example.com/training-program-interface-${interfaceNumber}.pdf`,
+        trainingDate: new Date(Date.now() + 7 * 86400000).toISOString(), // 7 days from now
+        location: `Training Center ${interfaceNumber}`,
+        duration: '3 days'
+      }
+    };
+  }
+
+  return { data: null }; // No training program if not directed to an interface
+};
+
+// Export student-related API functions
+export const studentAPI = {
+  getStudentProjects: mockGetStudentProjects,
+  getTrainingProgram: mockGetTrainingProgram
+};
+
 export default api;
