@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify'; // Import toast from react-toastify
 import useAuthStore from '../store/authStore';
 import ProjectList from '../components/admin/ProjectList';
 import ExportCSVButton from '../components/admin/ExportCSVButton';
@@ -10,9 +11,46 @@ export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('projects');
   const [projects, setProjects] = useState([]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const authAPI = {
+    logout: async () => {
+      try {
+        const response = await fetch('https://5138-41-111-220-41.ngrok-free.app/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Logout failed');
+        }
+  
+        return await response.json();
+      } catch (error) {
+        console.error('Error during logout:', error);
+        throw error;
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Call the logout endpoint
+      const data = await authAPI.logout();
+      // Show a success toast with the API message.
+      toast.success(data.message || 'Logged out successfully.');
+      // Clear authentication data
+      logout();
+      // Redirect to login after a short delay (e.g., 1 second) to allow the toast to show
+      setTimeout(() => {
+        navigate('/login');
+      }, 1000);
+    } catch (error) {
+      // Optionally show an error toast if logout fails
+      toast.error(error.message || 'Logout failed.');
+    }
   };
 
   return (
