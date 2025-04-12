@@ -55,7 +55,7 @@ export default function Login() {
       // Save the JWT token and user data in your authStore.
       setAuth(response.token, response.user);
       // Navigate to the tasks page upon successful login.
-      navigate('/tasks');
+      navigate('/student');
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {
