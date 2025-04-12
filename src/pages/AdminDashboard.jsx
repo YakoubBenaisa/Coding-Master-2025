@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify'; // Import toast from react-toastify
 import useAuthStore from '../store/authStore';
 import ProjectList from '../components/admin/ProjectList';
@@ -21,14 +21,15 @@ export default function AdminDashboard() {
             'Content-Type': 'application/json'
           },
         });
-  
+
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Logout failed');
         }
-  
-        return await response.json();
+
+        const result = await response.json();
         navigate("/student");
+        return result;
       } catch (error) {
         console.error('Error during logout:', error);
         throw error;
@@ -153,7 +154,12 @@ export default function AdminDashboard() {
                   Submit All Projects
                 </button>
               </div>
-              <ProjectList onProjectsLoaded={setProjects} />
+              <ProjectList
+                onProjectsLoaded={(loadedProjects) => {
+                  console.log('Projects loaded in AdminDashboard:', loadedProjects);
+                  setProjects(loadedProjects);
+                }}
+              />
             </div>
           ) : (
             <div className="bg-white shadow-md rounded-lg p-6 border border-gray-100 transition-all duration-300 hover:shadow-lg">

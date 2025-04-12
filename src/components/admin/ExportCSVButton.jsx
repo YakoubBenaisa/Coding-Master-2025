@@ -4,23 +4,24 @@ export default function ExportCSVButton({ projects }) {
   const [isExporting, setIsExporting] = useState(false);
 
   const exportToCSV = () => {
+    // Debug: Log the projects data to help diagnose issues
+    console.log('Projects data for CSV export:', projects);
     try {
       setIsExporting(true);
 
       // Create CSV headers
-      const headers = "Project Title,Team Members,Status\n";
+      const headers = "Project ID,Project Title,Description,Owner ID,Create Date,Status\n";
 
       // Create CSV rows
       const rows = projects.map(project => {
-        // Format team members as a comma-separated list of names
-        const teamMembers = project.teamMembers
-          ? project.teamMembers.map(member => member.name).join('; ')
-          : '';
-
         // Escape any commas in the title or description to prevent CSV format issues
-        const safeTitle = project.title.replace(/,/g, ' ');
+        const safeTitle = project.title ? project.title.replace(/,/g, ' ') : '';
+        const safeDescription = project.description ? project.description.replace(/,/g, ' ') : '';
 
-        return `"${safeTitle}","${teamMembers}","${project.status}"`;
+        // Format the date if it exists
+        const createDate = project.create_date ? new Date(project.create_date).toLocaleDateString() : '';
+
+        return `"${project.id || ''}","${safeTitle}","${safeDescription}","${project.owner_id || ''}","${createDate}","${project.status || ''}"`;
       }).join('\n');
 
       // Combine headers and rows
@@ -46,7 +47,9 @@ export default function ExportCSVButton({ projects }) {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting CSV:', error);
-      alert('Failed to export CSV. Please try again.');
+      // Provide more detailed error information
+      console.error('Projects data that caused the error:', projects);
+      alert(`Failed to export CSV: ${error.message}. Please check the console for details.`);
     } finally {
       setIsExporting(false);
     }

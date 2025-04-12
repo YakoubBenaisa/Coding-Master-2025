@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function ProjectList() {
+export default function ProjectList({ onProjectsLoaded }) {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,6 +27,10 @@ export default function ProjectList() {
         const data = await response.json();
         console.log('Fetched Data:', data);
         setProjects(data.projects);
+        // Call the onProjectsLoaded prop with the fetched projects
+        if (onProjectsLoaded && typeof onProjectsLoaded === 'function') {
+          onProjectsLoaded(data.projects);
+        }
         setError(null);
       } catch (err) {
         console.error('Error fetching projects:', err);
@@ -37,7 +41,7 @@ export default function ProjectList() {
     };
 
     fetchProjects();
-  }, []);
+  }, [onProjectsLoaded]);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -47,6 +51,10 @@ export default function ProjectList() {
         project.id === id ? { ...project, status: newStatus } : project
       );
       setProjects(updated);
+      // Update the parent component with the updated projects
+      if (onProjectsLoaded && typeof onProjectsLoaded === 'function') {
+        onProjectsLoaded(updated);
+      }
 
       const response = await fetch(`https://5138-41-111-220-41.ngrok-free.app/api/update-status/${id}`, {
         method: 'PATCH',
