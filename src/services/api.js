@@ -231,33 +231,11 @@ const mockGetStudentProjects = async () => {
   return { data: mockStudentProjects };
 };
 
-// Mock function to get training program details
-const mockGetTrainingProgram = async (projectId) => {
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
 
-  const project = mockStudentProjects.find(p => p.id === parseInt(projectId));
-  if (!project) throw new Error('Project not found');
-
-  // Only return PDF URL if project is directed to an interface
-  if (project.status.includes('Directed to Interface')) {
-    const interfaceNumber = project.status.split(' ').pop();
-    return {
-      data: {
-        pdfUrl: `https://example.com/training-program-interface-${interfaceNumber}.pdf`,
-        trainingDate: new Date(Date.now() + 7 * 86400000).toISOString(), // 7 days from now
-        location: `Training Center ${interfaceNumber}`,
-        duration: '3 days'
-      }
-    };
-  }
-
-  return { data: null }; // No training program if not directed to an interface
-};
 
 // Export student-related API functions
 export const studentAPI = {
-  getStudentProjects: mockGetStudentProjects,
-  getTrainingProgram: mockGetTrainingProgram
+  getStudentProjects: mockGetStudentProjects
 };
 
 export default api;

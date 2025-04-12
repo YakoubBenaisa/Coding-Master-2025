@@ -10,7 +10,6 @@ export default function StudentProjects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [trainingPrograms, setTrainingPrograms] = useState({});
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -18,27 +17,6 @@ export default function StudentProjects() {
         setLoading(true);
         const response = await studentAPI.getStudentProjects();
         setProjects(response.data);
-
-        // Fetch training program details for projects directed to interfaces
-        const directedProjects = response.data.filter(project =>
-          project.status.includes('Directed to Interface')
-        );
-
-        const programsData = {};
-        await Promise.all(
-          directedProjects.map(async (project) => {
-            try {
-              const programResponse = await studentAPI.getTrainingProgram(project.id);
-              if (programResponse.data) {
-                programsData[project.id] = programResponse.data;
-              }
-            } catch (err) {
-              console.error(`Error fetching training program for project ${project.id}:`, err);
-            }
-          })
-        );
-
-        setTrainingPrograms(programsData);
         setError(null);
       } catch (err) {
         setError('Failed to load projects. Please try again later.');
@@ -91,16 +69,7 @@ export default function StudentProjects() {
       yPos += 30;
     });
 
-    // Add training program info if available
-    if (trainingPrograms[project.id]) {
-      const program = trainingPrograms[project.id];
-      doc.setFontSize(14);
-      doc.text('Training Program Details:', 20, yPos);
-      doc.setFontSize(12);
-      doc.text(`Training Date: ${new Date(program.trainingDate).toLocaleDateString()}`, 25, yPos + 10);
-      doc.text(`Location: ${program.location}`, 25, yPos + 17);
-      doc.text(`Duration: ${program.duration}`, 25, yPos + 24);
-    }
+
 
     // Save the PDF
     doc.save(`project-${project.id}-details.pdf`);
@@ -189,26 +158,7 @@ export default function StudentProjects() {
 
                   <p className="text-gray-600 mb-4">{project.description}</p>
 
-                  {/* Training Program Link */}
-                  {project.status.includes('Directed to Interface') && trainingPrograms[project.id] && (
-                    <div className="mb-4 p-3 bg-blue-50 rounded-md">
-                      <h3 className="text-sm font-medium text-blue-800 mb-1">Training Program</h3>
-                      <a
-                        href={trainingPrograms[project.id].pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline flex items-center"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        View Training Program Details
-                      </a>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Training Date: {new Date(trainingPrograms[project.id].trainingDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
+
 
                   {/* Team Members */}
                   <div>
