@@ -3,20 +3,22 @@ import Login from './components/forms/auth/Login';
 import Register from './components/forms/auth/Register';
 import useAuthStore from './store/authStore';
 import AddMember from './components/forms/teaMembers/AddMember';
-import ProjectForm from './pages/RegisterProject';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminDashboard from './pages/AdminDashboard';
+
 function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   return (
     <Router>
       <Routes>
-       
+
         <Route path="/login" element={<Login />} />
-       
+
        <Route path='/register' element={<Register/>}/>
-    
+
        <Route path='/add-members' element={<AddMember/>}/>
-       <Route path='/create-project' element={<ProjectForm/>}/>
+       <Route path='/admin' element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
       </Routes>
     </Router>
   );
