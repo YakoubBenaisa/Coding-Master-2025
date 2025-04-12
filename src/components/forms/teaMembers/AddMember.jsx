@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
 const TeamForm = () => {
- 
+  // Team details state
+  const [teamName, setTeamName] = useState('');
+  const [matricule, setMatricule] = useState('');
+  
   // Leader id from localStorage
-  const [leaderId, setLeaderId] = useState(null);
+  const leaderId = useState(null);
   // State for team members array - each with member details
   const [members, setMembers] = useState([{
     memberId: '',
@@ -12,11 +15,19 @@ const TeamForm = () => {
     memberPhone: ''
   }]);
   
+  // Loading and error states
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  
   // On component mount, retrieve the leader id from localStorage
   useEffect(() => {
     const storedLeaderId = localStorage.getItem('leader_id');
     if (storedLeaderId) {
       setLeaderId(storedLeaderId);
+    } else {
+      // Default leader ID if not in localStorage
+      setLeaderId(4); // Using the leader_id from your example
     }
   }, []);
 
@@ -44,21 +55,60 @@ const TeamForm = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const teamData = {
-      // id is auto-incremented in the database
-      teamName,
-      matricule,
-      leader_id: leaderId,
-      // Only include non-empty members
-      members: members.filter(
-        (member) => member.memberId.trim() !== '' || member.memberName.trim() !== ''
-      ),
-    };
-
-    // Replace with your API call or further processing
-    console.log('Submitting team data:', teamData);
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+    
+    // Filter out empty member entries
+    const validMembers = members.filter(
+      (member) => member.memberId.trim() !== '' || member.memberName.trim() !== ''
+    );
+    
+    try {
+      // Submit each member with the team info
+      for (const member of validMembers) {
+        const memberData = {
+          matricule: matricule,
+          fullname: member.memberName,
+          email: member.memberEmail,
+          phone: member.memberPhone,
+          leader_id: leaderId
+        };
+        
+        const response = await fetch('https://5138-41-111-220-41.ngrok-free.app/api/add-team', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(memberData),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error adding team member: ${response.statusText}`);
+        }
+      }
+      
+      // All members added successfully
+      setSubmitSuccess(true);
+      
+      // Reset form after successful submission
+      setTeamName('');
+      setMatricule('');
+      setMembers([{
+        memberId: '',
+        memberName: '',
+        memberEmail: '',
+        memberPhone: ''
+      }]);
+      
+    } catch (error) {
+      console.error('Error submitting team data:', error);
+      setSubmitError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Inline styles for enhanced UI
@@ -143,6 +193,26 @@ const TeamForm = () => {
     flex: '1 1 45%',
     minWidth: '200px',
   };
+  
+  const alertStyle = {
+    padding: '0.75rem 1.25rem',
+    marginBottom: '1rem',
+    borderRadius: '0.25rem',
+  };
+  
+  const successAlertStyle = {
+    ...alertStyle,
+    backgroundColor: '#d4edda',
+    color: '#155724',
+    border: '1px solid #c3e6cb',
+  };
+  
+  const errorAlertStyle = {
+    ...alertStyle,
+    backgroundColor: '#f8d7da',
+    color: '#721c24',
+    border: '1px solid #f5c6cb',
+  };
 
   return (
     <form style={cardStyle} onSubmit={handleSubmit}>
@@ -150,7 +220,55 @@ const TeamForm = () => {
         Create New Team
       </h2>
 
-    
+      {/* Team Details Section */}
+      <div style={sectionStyle}>
+        <h3>Team Details</h3>
+        
+        <div style={twoColumnStyle}>
+          <div style={columnStyle}>
+            <label style={labelStyle} htmlFor="teamName">
+              Team Name:
+            </label>
+            <input
+              style={inputStyle}
+              type="text"
+              id="teamName"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              placeholder="Enter team name"
+              required
+            />
+          </div>
+          
+          <div style={columnStyle}>
+            <label style={labelStyle} htmlFor="matricule">
+              Matricule:
+            </label>
+            <input
+              style={inputStyle}
+              type="text"
+              id="matricule"
+              value={matricule}
+              onChange={(e) => setMatricule(e.target.value)}
+              placeholder="Enter matricule"
+              required
+            />
+          </div>
+        </div>
+      </div>
+      
+      {/* Status messages */}
+      {submitSuccess && (
+        <div style={successAlertStyle}>
+          Team members added successfully!
+        </div>
+      )}
+      
+      {submitError && (
+        <div style={errorAlertStyle}>
+          Error: {submitError}
+        </div>
+      )}
     
       {/* Team Members Section */}
       <div style={sectionStyle}>
@@ -160,13 +278,15 @@ const TeamForm = () => {
           <div key={index} style={memberCardStyle}>
             <div style={memberHeaderStyle}>
               <h4 style={{ margin: 0 }}>Member {index + 1}</h4>
-              <button
-                type="button"
-                style={removeButtonStyle}
-                onClick={() => removeMemberField(index)}
-              >
-                Remove
-              </button>
+              {members.length > 1 && (
+                <button
+                  type="button"
+                  style={removeButtonStyle}
+                  onClick={() => removeMemberField(index)}
+                >
+                  Remove
+                </button>
+              )}
             </div>
             
             <div style={twoColumnStyle}>
@@ -247,8 +367,16 @@ const TeamForm = () => {
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <button type="submit" style={submitButtonStyle}>
-          Submit
+        <button 
+          type="submit" 
+          style={{
+            ...submitButtonStyle,
+            opacity: isSubmitting ? 0.7 : 1,
+            cursor: isSubmitting ? 'not-allowed' : 'pointer'
+          }}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
     </form>
