@@ -82,7 +82,7 @@ const mockGetTask = async (id) => {
 
 const mockPostTask = async (payload) => {
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  
+
   const newTask = {
     id: Date.now(),
     title: payload.title,
@@ -90,7 +90,7 @@ const mockPostTask = async (payload) => {
     status: 'Sent',
     created_at: new Date().toISOString()
   };
-  
+
   mockTasks.push(newTask);
   return {
     data: newTask
@@ -105,19 +105,24 @@ const mockDeleteTask = async (taskId) => {
 
 const mockUpdateTask = async (taskId, payload) => {
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  
+
+  // Find the existing task to preserve any fields not in the payload
+  const existingTask = mockTasks.find(task => task.id === parseInt(taskId));
+
+  if (!existingTask) {
+    throw new Error('Task not found');
+  }
+
   const updatedTask = {
-    id: parseInt(taskId),
-    title: payload.title,
-    description: payload.description,
-    status: 'Updated',
-    created_at: new Date().toISOString()
+    ...existingTask,
+    ...payload,
+    id: parseInt(taskId)
   };
-  
-  mockTasks = mockTasks.map(task => 
+
+  mockTasks = mockTasks.map(task =>
     task.id === parseInt(taskId) ? updatedTask : task
   );
-  
+
   return {
     data: updatedTask
   };
@@ -153,12 +158,20 @@ export const authAPI = {
   getCurrentUser: () => api.get('/auth/user/'),
 };
 
+const mockGetStatuses = async () => {
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  return {
+    data: ['Sent', 'Directed to Interface 1', 'Directed to Interface 2', 'Directed to Interface 3', 'Rejected']
+  };
+};
+
 export const tasksAPI = {
   getTasks: mockGetTasks, // Using mock task fetching instead of real API
   getTask: mockGetTask, // Using mock task fetching instead of real API
   createTask: mockPostTask, // Using mock task creation instead of real API
   updateTask: mockUpdateTask, // Using mock task update instead of real API
   deleteTask: mockDeleteTask, // Using mock task deletion instead of real API
+  getStatuses: mockGetStatuses, // Using mock statuses fetching
 };
 
-export default api; 
+export default api;

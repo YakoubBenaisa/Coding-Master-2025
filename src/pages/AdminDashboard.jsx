@@ -144,6 +144,14 @@ export default function AdminDashboard() {
               <p className="text-gray-600 mb-6">
                 This is the projects section of the admin dashboard. Here you can manage all projects.
               </p>
+              <div className="flex justify-end mb-4">
+                <button
+                  disabled={true}
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow opacity-50 cursor-not-allowed"
+                >
+                  Submit All Projects
+                </button>
+              </div>
               <ProjectList onProjectsLoaded={setProjects} />
             </div>
           ) : (
