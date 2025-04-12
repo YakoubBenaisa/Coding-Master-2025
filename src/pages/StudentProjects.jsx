@@ -70,8 +70,22 @@ export default function StudentProjects() {
       doc.text(`Phone: ${user.phone || 'N/A'}`, 20, 44);
     }
 
+    // Add status color indicator
+    let statusColor;
+    if (project.status.includes('Directed')) {
+      statusColor = [0, 128, 0]; // Green
+    } else if (project.status === 'Rejected') {
+      statusColor = [220, 0, 0]; // Red
+    } else if (project.status === 'Processing') {
+      statusColor = [255, 165, 0]; // Orange
+    } else {
+      statusColor = [0, 0, 255]; // Blue
+    }
+    doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+
     // Add project details
     doc.text(`Status: ${project.status}`, 20, 55);
+    doc.setTextColor(0, 0, 0); // Reset text color to black
     doc.text(`Submission Status: ${project.submitted ? 'Submitted' : 'Not Submitted'}`, 20, 62);
     if (project.submitted) {
       doc.text(`Submitted on: ${new Date(project.submitted_at).toLocaleString()}`, 20, 69);
@@ -280,7 +294,7 @@ export default function StudentProjects() {
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800 mb-2">{project.title}</h2>
                       <div className="flex flex-wrap gap-2 mb-3">
-                        <div className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${project.status.includes('Directed') ? 'bg-green-100 text-green-800' : project.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+                        <div className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${project.status.includes('Directed') ? 'bg-green-100 text-green-800' : project.status === 'Rejected' ? 'bg-red-100 text-red-800' : project.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>
                           {project.status}
                         </div>
                         {project.submitted ? (

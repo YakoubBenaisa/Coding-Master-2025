@@ -19,7 +19,14 @@ let mockTasks = [
     id: 2,
     title: 'Sample Task 2',
     description: 'Another sample task description',
-    status: 'Sent',
+    status: 'Processing',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 3,
+    title: 'Sample Task 3',
+    description: 'A third sample task description',
+    status: 'Directed to Interface 1',
     created_at: new Date().toISOString()
   }
 ];
@@ -149,7 +156,7 @@ export const authAPI = {
 const mockGetStatuses = async () => {
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
   return {
-    data: ['Sent', 'Directed to Interface 1', 'Directed to Interface 2', 'Directed to Interface 3', 'Rejected']
+    data: ['Sent', 'Processing', 'Directed to Interface 1', 'Directed to Interface 2', 'Directed to Interface 3', 'Rejected']
   };
 };
 
@@ -168,7 +175,7 @@ let mockStudentProjects = [
     id: 101,
     title: 'Smart Home Automation',
     description: 'A project to automate home appliances using IoT devices and machine learning algorithms. The system will learn user preferences over time and adjust settings automatically.',
-    status: 'Sent',
+    status: 'Processing',
     created_at: new Date().toISOString(),
     submitted: false,
     submission_deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
