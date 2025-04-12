@@ -54,8 +54,16 @@ export default function Login() {
       const response = await authAPI.login(credentials);
       // Save the JWT token and user data in your authStore.
       setAuth(response.token, response.user);
-      // Navigate to the tasks page upon successful login.
-      navigate('/student');
+
+      // Check user role and redirect accordingly
+      if (response.user && response.user.role === 'supervisor') {
+        navigate('/supervisor');
+      } else if (response.user && response.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        // Default to student dashboard
+        navigate('/student');
+      }
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {
@@ -80,7 +88,7 @@ export default function Login() {
             Sign in to your account to continue
           </p>
         </div>
-        
+
         {/* Form Card */}
         <div className="bg-white py-8 px-8 shadow-xl rounded-2xl border border-gray-100">
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -98,7 +106,7 @@ export default function Login() {
                 </div>
               </div>
             )}
-            
+
             {/* Email field with icon */}
             <div className="space-y-5">
               <div>
@@ -123,7 +131,7 @@ export default function Login() {
                   />
                 </div>
               </div>
-              
+
               {/* Password field with icon */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -193,7 +201,7 @@ export default function Login() {
               </button>
             </div>
           </form>
-          
+
           {/* Sign up link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
@@ -203,7 +211,7 @@ export default function Login() {
               </a>
             </p>
           </div>
-          
+
           {/* Social login options */}
           <div className="mt-6">
             <div className="relative">

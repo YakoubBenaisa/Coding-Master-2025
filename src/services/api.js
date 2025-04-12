@@ -44,15 +44,31 @@ const login = async (credentials) => {
 
     // Mock successful login response
     // In a real app, this would come from the server
+
+    // For demo purposes, assign different roles based on email
+    let role = 'student';
+    let lastname = 'Student';
+
+    // Check if this is a supervisor account
+    if (credentials.email.includes('supervisor')) {
+      role = 'supervisor';
+      lastname = 'Supervisor';
+    }
+    // Check if this is an admin account
+    else if (credentials.email.includes('admin')) {
+      role = 'admin';
+      lastname = 'Admin';
+    }
+
     return {
       token: 'mock-jwt-token-' + Date.now(),
       user: {
         id: 'user-' + Date.now(),
         email: credentials.email,
         firstname: credentials.email.split('@')[0],
-        lastname: 'Student',
+        lastname: lastname,
         phone: '123-456-7890',
-        role: 'student',
+        role: role,
         created_at: new Date().toISOString()
       }
     };
@@ -311,6 +327,35 @@ export const studentAPI = {
   getStudentProject: mockGetStudentProject,
   submitProject: mockSubmitProject,
   updateStudentProject: mockUpdateStudentProject
+};
+
+// Mock function to get all projects for supervisors
+const mockGetAllProjects = async () => {
+  await new Promise(resolve => setTimeout(resolve, 600)); // Simulate network delay
+
+  // Return all projects
+  return { data: mockStudentProjects };
+};
+
+// Mock function to send educational program to a project owner
+const mockSendEducationalProgram = async (projectId, file, message) => {
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+
+  // In a real app, this would upload the file to the server and notify the project owner
+  console.log(`Sending educational program to project ${projectId}`);
+  console.log(`File: ${file.name}, Size: ${file.size} bytes`);
+  console.log(`Message: ${message || 'No message provided'}`);
+
+  return {
+    success: true,
+    message: 'Educational program sent successfully'
+  };
+};
+
+// Export supervisor-related API functions
+export const supervisorAPI = {
+  getAllProjects: mockGetAllProjects,
+  sendEducationalProgram: mockSendEducationalProgram
 };
 
 export default api;

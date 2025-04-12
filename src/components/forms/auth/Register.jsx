@@ -32,12 +32,12 @@ export default function Register() {
             },
             body: JSON.stringify(credentials)
           });
-    
+
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Register failed');
           }
-    
+
           // Return the JSON payload assuming it has the shape:
           // { data: { token: '...', user: { id, email, username } } }
           return await response.json();
@@ -47,7 +47,7 @@ export default function Register() {
         }
       }
     };
-    
+
     try {
       const response = await authAPI.register(userData); // Should post to the register endpoint
       // On successful registration, update your auth store with the token and user info.
