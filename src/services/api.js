@@ -3,11 +3,8 @@ import useAuthStore from '../store/authStore';
 
 const API_URL = 'http://localhost:8000/api';
 
-// Mock data
-const MOCK_USER = {
-  email: 'student@unive.com',
-  password: 'hackathon2025'
-};
+// API base URL
+// In a real app, this would point to your backend server
 
 // Mock tasks data
 let mockTasks = [
@@ -30,42 +27,33 @@ let mockTasks = [
 // Mock functions
 const login = async (credentials) => {
   try {
-    const response = await fetch(API_URL+'/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    if (!response.ok) {
-      // Optionally, you can customize error handling based on response status.
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Login failed');
+    // For demo purposes, accept any credentials but validate they exist
+    if (!credentials.email || !credentials.password) {
+      throw new Error('Email and password are required');
     }
 
-    // Assuming the API returns JSON in a similar structure as your mockLogin function.
-    const data = await response.json();
-    return data;
+    // Mock successful login response
+    // In a real app, this would come from the server
+    return {
+      token: 'mock-jwt-token-' + Date.now(),
+      user: {
+        id: 'user-' + Date.now(),
+        email: credentials.email,
+        firstname: credentials.email.split('@')[0],
+        lastname: 'Student',
+        phone: '123-456-7890',
+        role: 'student',
+        created_at: new Date().toISOString()
+      }
+    };
   } catch (error) {
     console.error('Error during login:', error);
-    // Here you might want to re-throw the error or handle it gracefully.
     throw error;
   }
 };
-
-// Example usage:
-const credentials = { email: 'user@example.com', password: 'securePassword' };
-
-login(credentials)
-  .then(data => {
-    // Successful login: handle token and user info from data.data
-    console.log('Login successful:', data);
-  })
-  .catch(error => {
-    // Handle errors: show error message, etc.
-    console.error('Login error:', error);
-  });
 
 
 const mockGetTasks = async () => {
@@ -182,6 +170,8 @@ let mockStudentProjects = [
     description: 'A project to automate home appliances using IoT devices and machine learning algorithms. The system will learn user preferences over time and adjust settings automatically.',
     status: 'Sent',
     created_at: new Date().toISOString(),
+    submitted: false,
+    submission_deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
     teamMembers: [
       { id: 'ST001', name: 'John Doe', email: 'john@example.com', phone: '123-456-7890' },
       { id: 'ST002', name: 'Jane Smith', email: 'jane@example.com', phone: '234-567-8901' }
@@ -193,6 +183,9 @@ let mockStudentProjects = [
     description: 'A chatbot that uses natural language processing to provide customer support for e-commerce websites. It can handle product inquiries, order status, and returns.',
     status: 'Directed to Interface 1',
     created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    submitted: true,
+    submitted_at: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
+    submission_deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
     teamMembers: [
       { id: 'ST003', name: 'Bob Johnson', email: 'bob@example.com', phone: '345-678-9012' },
       { id: 'ST004', name: 'Alice Brown', email: 'alice@example.com', phone: '456-789-0123' },
@@ -205,6 +198,8 @@ let mockStudentProjects = [
     description: 'A secure and transparent voting system using blockchain technology to ensure the integrity of election results and prevent fraud.',
     status: 'Directed to Interface 2',
     created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    submitted: false,
+    submission_deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
     teamMembers: [
       { id: 'ST006', name: 'David Wilson', email: 'david@example.com', phone: '678-901-2345' },
       { id: 'ST007', name: 'Eva Martinez', email: 'eva@example.com', phone: '789-012-3456' },
@@ -218,6 +213,9 @@ let mockStudentProjects = [
     description: 'An educational app that uses augmented reality to make learning more interactive and engaging for K-12 students. Covers subjects like science, history, and mathematics.',
     status: 'Rejected',
     created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+    submitted: true,
+    submitted_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    submission_deadline: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago (past deadline)
     teamMembers: [
       { id: 'ST010', name: 'Henry Clark', email: 'henry@example.com', phone: '012-345-6789' },
       { id: 'ST011', name: 'Ivy Rodriguez', email: 'ivy@example.com', phone: '123-456-7890' }
@@ -231,33 +229,64 @@ const mockGetStudentProjects = async () => {
   return { data: mockStudentProjects };
 };
 
-// Mock function to get training program details
-const mockGetTrainingProgram = async (projectId) => {
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
 
-  const project = mockStudentProjects.find(p => p.id === parseInt(projectId));
-  if (!project) throw new Error('Project not found');
 
-  // Only return PDF URL if project is directed to an interface
-  if (project.status.includes('Directed to Interface')) {
-    const interfaceNumber = project.status.split(' ').pop();
-    return {
-      data: {
-        pdfUrl: `https://example.com/training-program-interface-${interfaceNumber}.pdf`,
-        trainingDate: new Date(Date.now() + 7 * 86400000).toISOString(), // 7 days from now
-        location: `Training Center ${interfaceNumber}`,
-        duration: '3 days'
-      }
-    };
+// Mock function to submit a project
+const mockSubmitProject = async (projectId) => {
+  await new Promise(resolve => setTimeout(resolve, 600)); // Simulate network delay
+
+  const projectIndex = mockStudentProjects.findIndex(p => p.id === parseInt(projectId));
+
+  if (projectIndex === -1) {
+    throw new Error('Project not found');
   }
 
-  return { data: null }; // No training program if not directed to an interface
+  // Update the project's submitted status
+  mockStudentProjects[projectIndex] = {
+    ...mockStudentProjects[projectIndex],
+    submitted: true,
+    submitted_at: new Date().toISOString()
+  };
+
+  return { data: mockStudentProjects[projectIndex] };
+};
+
+// Mock function to update a student project
+const mockUpdateStudentProject = async (projectId, payload) => {
+  await new Promise(resolve => setTimeout(resolve, 600)); // Simulate network delay
+
+  const projectIndex = mockStudentProjects.findIndex(p => p.id === parseInt(projectId));
+
+  if (projectIndex === -1) {
+    throw new Error('Project not found');
+  }
+
+  // Check if project is already submitted
+  if (mockStudentProjects[projectIndex].submitted) {
+    throw new Error('Cannot update a submitted project');
+  }
+
+  // Check if project is past deadline
+  const deadline = new Date(mockStudentProjects[projectIndex].submission_deadline);
+  if (deadline < new Date()) {
+    throw new Error('Cannot update a project past its submission deadline');
+  }
+
+  // Update the project
+  mockStudentProjects[projectIndex] = {
+    ...mockStudentProjects[projectIndex],
+    ...payload,
+    id: parseInt(projectId) // Ensure ID doesn't change
+  };
+
+  return { data: mockStudentProjects[projectIndex] };
 };
 
 // Export student-related API functions
 export const studentAPI = {
   getStudentProjects: mockGetStudentProjects,
-  getTrainingProgram: mockGetTrainingProgram
+  submitProject: mockSubmitProject,
+  updateStudentProject: mockUpdateStudentProject
 };
 
 export default api;
