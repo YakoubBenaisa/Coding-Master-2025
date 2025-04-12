@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { projectAPI } from '../services/api';
 
 export default function ProjectForm() {
   const [formData, setFormData] = useState({
@@ -28,67 +29,55 @@ export default function ProjectForm() {
     setSuccess('');
     setLoading(true);
 
-    // Retrieve owner_id from localStorage; convert to number if needed
-    const owner_id = JSON.parse(localStorage.getItem('user')).id;
-    console.log('owner_id:', owner_id);
-     
-    const create_date =new Date().toISOString().split('T')[0]
-    console.log('create_date:', create_date);
-
-    // Build the payload for the API call
-    const payload = {
-      title: formData.title,
-      description: formData.description,
-      owner_id, // This sets owner_id from localStorage
-      create_date 
-    };
-
     try {
-      const response = await fetch('https://5138-41-111-220-41.ngrok-free.app/api/add-project', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        // Try to get error details from the API
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Project creation failed');
+      // Get user ID from localStorage
+      let owner_id;
+      try {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          owner_id = JSON.parse(userData).id;
+          console.log('owner_id:', owner_id);
         } else {
-          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+          // Use a default ID if user data is not available
+          owner_id = 1;
+          console.log('Using default owner_id:', owner_id);
         }
+      } catch (parseError) {
+        console.error('Error parsing user data:', parseError);
+        owner_id = 1; // Fallback to default ID
       }
 
-      // Get the response data (if your API returns something)
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        setSuccess('Project created successfully!');
-        console.log('Submitted project:', data);
-        window.location.href = '/student';
-      } else {
-        setSuccess('Project created successfully!');
-        console.log('Project submitted, but no JSON response received');
-      }
+      const create_date = new Date().toISOString().split('T')[0];
+      console.log('create_date:', create_date);
 
+      // Build the payload for the API call
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        owner_id,
+        create_date
+      };
+
+      // Use the mock API instead of direct fetch
+      const response = await projectAPI.createProject(payload);
+      
+      setSuccess('Project created successfully!');
+      console.log('Submitted project:', response.data);
+      
       // Reset form after success
       setFormData({
         title: '',
         description: '',
       });
+      
+      // Redirect to student page after a short delay
+      setTimeout(() => {
+        window.location.href = '/student';
+      }, 1500);
+      
     } catch (err) {
       console.error('Error submitting project:', err);
-      // Check if it's the HTML parsing error
-      if (err.name === 'SyntaxError' && err.message.includes('Unexpected token')) {
-        setError('Server error: The API endpoint is not responding correctly. Please try again later.');
-      } else {
-        setError(err.message || 'Project creation failed');
-      }
+      setError(err.message || 'Project creation failed');
     } finally {
       setLoading(false);
     }
@@ -101,6 +90,18 @@ export default function ProjectForm() {
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-md animate-pulse">
           <p className="text-sm font-medium text-red-700">{error}</p>
+          {error.includes('ngrok') && (
+            <p className="text-sm mt-2">
+              <a
+                href="https://5138-41-111-220-41.ngrok-free.app/api/add-project"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Open API URL in new tab
+              </a>
+            </p>
+          )}
         </div>
       )}
 

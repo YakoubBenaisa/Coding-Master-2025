@@ -147,10 +147,61 @@ api.interceptors.response.use(
   }
 );
 
+// Mock register function
+const register = async (userData) => {
+  try {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // For demo purposes, validate required fields
+    if (!userData.email || !userData.password) {
+      throw new Error('Email and password are required');
+    }
+
+    // Mock successful registration response
+    return {
+      token: 'mock-jwt-token-' + Date.now(),
+      user: {
+        id: 'user-' + Date.now(),
+        email: userData.email,
+        firstname: userData.firstname || userData.email.split('@')[0],
+        lastname: userData.lastname || 'User',
+        phone: userData.phone || '123-456-7890',
+        role: userData.role || 'student',
+        created_at: new Date().toISOString()
+      }
+    };
+  } catch (error) {
+    console.error('Error during registration:', error);
+    throw error;
+  }
+};
+
+// Mock getCurrentUser function
+const getCurrentUser = async () => {
+  try {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Get user from local storage
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      throw new Error('User not found');
+    }
+
+    return {
+      data: JSON.parse(userStr)
+    };
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    throw error;
+  }
+};
+
 export const authAPI = {
   login: login, // Using mock login instead of real API
-  register: (userData) => api.post('/auth/register/', userData),
-  getCurrentUser: () => api.get('/auth/user/'),
+  register: register, // Using mock register instead of real API
+  getCurrentUser: getCurrentUser, // Using mock getCurrentUser instead of real API
 };
 
 const mockGetStatuses = async () => {
@@ -167,6 +218,73 @@ export const tasksAPI = {
   updateTask: mockUpdateTask, // Using mock task update instead of real API
   deleteTask: mockDeleteTask, // Using mock task deletion instead of real API
   getStatuses: mockGetStatuses, // Using mock statuses fetching
+};
+
+// Mock projects data
+let mockProjects = [
+  {
+    id: 1,
+    title: 'E-commerce Platform',
+    description: 'A full-featured online shopping platform with user authentication, product catalog, and payment processing.',
+    owner_id: 1,
+    create_date: new Date().toISOString()
+  },
+  {
+    id: 2,
+    title: 'Task Management App',
+    description: 'A productivity application for managing tasks, projects, and deadlines with team collaboration features.',
+    owner_id: 2,
+    create_date: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+  },
+  {
+    id: 3,
+    title: 'Social Media Dashboard',
+    description: 'A dashboard for managing and analyzing social media accounts across multiple platforms.',
+    owner_id: 1,
+    create_date: new Date(Date.now() - 172800000).toISOString() // 2 days ago
+  }
+];
+
+// Mock function to get all projects
+const mockGetProjects = async () => {
+  await new Promise(resolve => setTimeout(resolve, 600)); // Simulate network delay
+  return { data: mockProjects };
+};
+
+// Mock function to get a single project by ID
+const mockGetProject = async (projectId) => {
+  await new Promise(resolve => setTimeout(resolve, 600)); // Simulate network delay
+
+  const project = mockProjects.find(p => p.id === parseInt(projectId));
+
+  if (!project) {
+    throw new Error('Project not found');
+  }
+
+  return { data: project };
+};
+
+// Mock function to create a new project
+const mockCreateProject = async (payload) => {
+  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+
+  const newProject = {
+    id: Date.now(),
+    title: payload.title,
+    description: payload.description,
+    owner_id: payload.owner_id,
+    create_date: payload.create_date || new Date().toISOString()
+  };
+
+  mockProjects.push(newProject);
+  return { data: newProject };
+};
+
+// Export project-related API functions
+export const projectAPI = {
+  getProjects: mockGetProjects,
+  getProject: mockGetProject,
+  createProject: mockCreateProject
 };
 
 // Mock student projects data

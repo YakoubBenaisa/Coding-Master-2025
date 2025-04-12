@@ -54,8 +54,14 @@ export default function Login() {
       const response = await authAPI.login(credentials);
       // Save the JWT token and user data in your authStore.
       setAuth(response.token, response.user);
+
       // Navigate to the tasks page upon successful login.
-      navigate('/student');
+      if (response.user.role === 'admin') {
+        navigate('/admin');
+      }
+      else
+      if (response.user.role === 'etudiant') navigate('/student');
+      if (response.user.role === 'supervisor') navigate('/supervisor');
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {

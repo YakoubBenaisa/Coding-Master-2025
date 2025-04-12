@@ -8,6 +8,8 @@ export default defineConfig({
     react()
   ],
   server: {
+    // Commenting out the proxy to avoid ngrok issues
+    /*
     proxy: {
       '/api': {
         target: 'https://5138-41-111-220-41.ngrok-free.app',
@@ -16,6 +18,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, '')
       }
     },
+    */
     cors: {
       origin: '*',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
