@@ -58,6 +58,8 @@ export default function Login() {
       // Check user role and redirect accordingly
       if (response.user && response.user.role === 'supervisor') {
         navigate('/supervisor');
+      } else if (response.user && response.user.role === 'supervisyer') {
+        navigate('/supervisyer');
       } else if (response.user && response.user.role === 'admin') {
         navigate('/admin');
       } else {

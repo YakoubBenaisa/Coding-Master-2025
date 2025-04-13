@@ -27,7 +27,7 @@ export default function Home() {
                 <span className="ml-2 text-xl font-bold text-gray-900">Consin</span>
               </div>
             </div>
-            
+
             {/* Desktop navigation */}
             <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
               <Link to="/" className="px-3 py-2 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
@@ -37,8 +37,8 @@ export default function Home() {
                 About
               </Link>
               {isAuthenticated ? (
-                <Link 
-                  to={user?.role === 'admin' ? '/admin' : user?.role === 'supervisor' ? '/supervisor' : '/student'} 
+                <Link
+                  to={user?.role === 'admin' ? '/admin' : user?.role === 'supervisor' ? '/supervisor' : user?.role === 'supervisyer' ? '/supervisyer' : '/student'}
                   className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Dashboard
@@ -54,7 +54,7 @@ export default function Home() {
                 </div>
               )}
             </div>
-            
+
             {/* Mobile menu button */}
             <div className="flex items-center sm:hidden">
               <button
@@ -87,8 +87,8 @@ export default function Home() {
                 About
               </Link>
               {isAuthenticated ? (
-                <Link 
-                  to={user?.role === 'admin' ? '/admin' : user?.role === 'supervisor' ? '/supervisor' : '/student'} 
+                <Link
+                  to={user?.role === 'admin' ? '/admin' : user?.role === 'supervisor' ? '/supervisor' : user?.role === 'supervisyer' ? '/supervisyer' : '/student'}
                   className="block px-3 py-2 text-base font-medium text-indigo-600 hover:bg-indigo-50 hover:border-l-4 hover:border-indigo-300"
                 >
                   Dashboard
@@ -128,7 +128,7 @@ export default function Home() {
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 {isAuthenticated ? (
                   <Link
-                    to={user?.role === 'admin' ? '/admin' : user?.role === 'supervisor' ? '/supervisor' : '/student'}
+                    to={user?.role === 'admin' ? '/admin' : user?.role === 'supervisor' ? '/supervisor' : user?.role === 'supervisyer' ? '/supervisyer' : '/student'}
                     className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
                   >
                     Go to Dashboard

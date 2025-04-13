@@ -62,7 +62,7 @@ export default function SupervisorDashboard() {
           return;
         }
 
-        if (user.role !== 'supervisor') {
+        if (user.role !== 'supervisor' && user.role !== 'supervisyer') {
           setError('You do not have permission to access this page.');
           setTimeout(() => {
             navigate('/login');
@@ -340,8 +340,8 @@ export default function SupervisorDashboard() {
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{project.owner.name}</div>
-                                <div className="text-sm text-gray-500">{project.owner.email}</div>
+                                <div className="text-sm text-gray-900">{project.teamMembers && project.teamMembers[0] ? project.teamMembers[0].name : 'Unknown'}</div>
+                                <div className="text-sm text-gray-500">{project.teamMembers && project.teamMembers[0] ? project.teamMembers[0].email : 'Unknown'}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
@@ -407,7 +407,7 @@ export default function SupervisorDashboard() {
                         <option value="">-- Select a project --</option>
                         {projects.map((project) => (
                           <option key={project.id} value={project.id}>
-                            {project.title} - {project.owner.name}
+                            {project.title} - {project.teamMembers && project.teamMembers[0] ? project.teamMembers[0].name : 'Unknown'}
                           </option>
                         ))}
                       </select>

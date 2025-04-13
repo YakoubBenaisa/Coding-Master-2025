@@ -51,7 +51,7 @@ const login = async (credentials) => {
 
     // Check if this is a supervisor account
     if (credentials.email.includes('supervisor')) {
-      role = 'supervisor';
+      role = 'supervisyer';
       lastname = 'Supervisor';
     }
     // Check if this is an admin account

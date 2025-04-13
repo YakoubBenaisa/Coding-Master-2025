@@ -28,6 +28,7 @@ function App() {
         <Route path='/create-project' element={<ProjectForm/>}/>
         <Route path='/admin' element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
         <Route path='/supervisor' element={<ProtectedRoute><SupervisorDashboard /></ProtectedRoute>}/>
+        <Route path='/supervisyer' element={<ProtectedRoute><SupervisorDashboard /></ProtectedRoute>}/>
         <Route path='/student/projects' element={<ProtectedRoute><StudentProjects /></ProtectedRoute>}/>
         <Route path='/student' element={<Navigate to='/student/projects' replace />}/>
       </Routes>
